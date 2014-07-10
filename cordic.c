@@ -9,6 +9,10 @@ typedef struct vector3 {
 
 typedef enum {ROTATION, VECTOR} cordic_mode_t;
 
+/*
+ * The elementary angles for the lookup table. They correspond to
+ * arctan(2^-i)
+ */
 double elem_angle[] = {
 	45.00, 26.56, 14.04,
 	7.13, 3.58, 1.79,
@@ -17,6 +21,10 @@ double elem_angle[] = {
 };
 int elem_size = 12;
 
+/*
+ * Shift the values of x and y to the right
+ * by the number of iterations
+ */ 
 void iter_shift(int *x, int *y, int iteration)
 {
 	int i;
@@ -27,6 +35,11 @@ void iter_shift(int *x, int *y, int iteration)
 	}
 }
 
+/*
+ * This was supposed to return the appropriate true or false
+ * value depending on the mode, but I couldn't get
+ * this working.
+ */
 int rot_decision(cordic_mode_t mode, void * val)
 {
 	int result;
@@ -49,8 +62,14 @@ int rot_decision(cordic_mode_t mode, void * val)
 
 
 /**
- *
- *
+ * Cordic in rotation mode. The only difference between this and cordic
+ * vector mode is the if condition in the for loop. Look at the slides
+ * to better understand the formula. x and y are shifted to the left by
+ * 8 to give it better precision, but proper fixed point arithmetic hasn'table
+ * been implemented
+ * x: The x coordinate in the vector.
+ * y: The y coordinate in the vector.
+ * z: The angle accumulator. Reaches 0 after n iterations
  */ 
 vector3 cordic_rotation(int x, int y, double z)
 {
@@ -88,7 +107,13 @@ vector3 cordic_rotation(int x, int y, double z)
 	return result;
 }
 
-// y should somehow go to 0
+/* Much like cordic_rotation mode. The only difference
+ * is the condiition in the middle of the for loop. Need
+ * to make everything in fixed point arithmetic.
+ * x: The x coordinate of the vector.
+ * y: The y coordinate of the vector. Reaches 0 after n iterations.
+ * z: The angle accumulator. Reaches z[0] + arctan(y[0]/x[0]) after n iterations.
+ */
 vector3 cordic_vector(int x, int y, double z)
 {
 	int i;
@@ -103,15 +128,15 @@ vector3 cordic_vector(int x, int y, double z)
 		x_shift = x;
 		y_shift = y;
 		iter_shift(&x_shift, &y_shift, i);
-		if (y < 0)
+		if (y >= 0)
 		{
-			x = x - y_shift;
-			y = y + x_shift;
-			z = z - elem_angle[i]; 
-		} else {
 			x = x + y_shift;
 			y = y - x_shift;
-			z = z + elem_angle[i];
+			z = z + elem_angle[i]; 
+		} else {
+			x = x - y_shift;
+			y = y + x_shift;
+			z = z - elem_angle[i];
 		}
 		printf("i: %d z: %f\n", i,z);
 	}
