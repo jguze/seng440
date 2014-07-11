@@ -1,14 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct vector3 {
-	int x;
-	int y;
-	double z;
-} vector3;
-
-typedef enum {ROTATION, VECTOR} cordic_mode_t;
-
+#define ELEM_SIZE 12
 /*
  * The elementary angles for the lookup table. They correspond to
  * arctan(2^-i)
@@ -19,21 +12,14 @@ double elem_angle[] = {
 	0.89, 0.45, 0.22,
 	0.11, 0.06, 0.03
 };
-int elem_size = 12;
 
-/*
- * Shift the values of x and y to the right
- * by the number of iterations
- */ 
-void iter_shift(int *x, int *y, int iteration)
-{
-	int i;
-	for (i = iteration; i != 0; i--)
-	{
-		*x = *x >> 1;
-		*y = *y >> 1;
-	}
-}
+typedef struct vector3 {
+	int x;
+	int y;
+	double z;
+} vector3;
+
+typedef enum {ROTATION, VECTOR} cordic_mode_t;
 
 /*
  * This was supposed to return the appropriate true or false
@@ -74,31 +60,22 @@ int rot_decision(cordic_mode_t mode, void * val)
 vector3 cordic_rotation(int x, int y, double z)
 {
 	int i;
-	int x_shift;
-	int y_shift;
-
-	x = x << 8;
-	y = y << 8;
+	int x_temp;
 	
-	for (i = 0; i < elem_size; i++)
+	for (i = 0; i < ELEM_SIZE; i++)
 	{
-		x_shift = x;
-		y_shift = y;
-		iter_shift(&x_shift, &y_shift, i);
+		x_temp = x;
 		if (z < 0)
 		{
-			x = x + y_shift;
-			y = y - x_shift;
+			x = x + (y >> i);
+			y = y - (x_temp >> i);
 			z = z + elem_angle[i]; 
 		} else {
-			x = x - y_shift;
-			y = y + x_shift;
+			x = x - (y >> i);
+			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
 	}
-
-	x = x >> 8;
-	y = y >> 8;
 
 	vector3 result;
 	result.x = x;
@@ -117,25 +94,22 @@ vector3 cordic_rotation(int x, int y, double z)
 vector3 cordic_vector(int x, int y, double z)
 {
 	int i;
-	int x_shift;
-	int y_shift;
+	int x_temp;
 	
-	x = x << 8;
-	y = y << 8;
+	x = x << 16;
+	y = y << 16;
 
-	for (i = 0; i < elem_size; i++)
+	for (i = 0; i < ELEM_SIZE; i++)
 	{
-		x_shift = x;
-		y_shift = y;
-		iter_shift(&x_shift, &y_shift, i);
+		x_temp = x;
 		if (y >= 0)
 		{
-			x = x + y_shift;
-			y = y - x_shift;
+			x = x + (y >> i);
+			y = y - (x_temp >> i);
 			z = z + elem_angle[i]; 
 		} else {
-			x = x - y_shift;
-			y = y + x_shift;
+			x = x - (y >> i);
+			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
 		printf("i: %d z: %f\n", i,z);
