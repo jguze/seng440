@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define SHIFT 16
+#define SHIFT_MASK ((1 << SHIFT ) - 1)
+
 #define ELEM_SIZE 12
 /*
  * The elementary angles for the lookup table. They correspond to
@@ -62,6 +65,9 @@ vector3 cordic_rotation(int x, int y, double z)
 	int i;
 	int x_temp;
 	
+	x = x << SHIFT;
+	y = y << SHIFT;
+	
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
 		x_temp = x;
@@ -96,8 +102,8 @@ vector3 cordic_vector(int x, int y, double z)
 	int i;
 	int x_temp;
 	
-	x = x << 16;
-	y = y << 16;
+	x = x << SHIFT;
+	y = y << SHIFT;
 
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
@@ -112,7 +118,6 @@ vector3 cordic_vector(int x, int y, double z)
 			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
-		printf("i: %d z: %f\n", i,z);
 	}
 	vector3 result;
 	result.x = x;
@@ -157,8 +162,9 @@ double arctan_cordic(int x)
 
 int main()
 {
-	printf("Cos(45): %d\n", cos_cordic(45));
-	printf("Sin(90): %d\n", sin_cordic(90));
+	printf("cos(45) int %d\n", cos_cordic(45) & SHIFT_MASK);
+	printf("Cos(45): %f\n", ((double)(cos_cordic(45) & SHIFT_MASK) / (1 << SHIFT)));
+	printf("Sin(90): %f\n", ((double)(sin_cordic(90) & SHIFT_MASK) / (1 << SHIFT)));
 	printf("Arctan(5/4): %f\n", arctan_div_cordic(4,5));
 	printf("Arctan(2): %f\n", arctan_cordic(2));
 	return 0;
