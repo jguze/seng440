@@ -35,22 +35,25 @@ int float_to_fixed(double flt)
 }
 
 /*
- * This was supposed to return the appropriate true or false
- * value depending on the mode, but I couldn't get
- * this working.
+ * This is to reduce our amount of code for one more if statement per
+ * loop. It checks if (z < 0) and if (y >= 0). Depending on the mode, it
+ * will return
  */
-int rot_decision(cordic_mode_t mode, void * val)
+int rot_decision(cordic_mode_t mode, int val)
 {
+
 	int result;
-	int value = *((int*) val);
-	printf("VALUE %d\n", value);
-	if (value < 0)
+	if (val < 0)
 	{
 		result = 1;
 	} else {
 		result = 0;
 	}
 
+	/* The function will return the result if we are in rotation mode,
+	 * and the opposite if we are in vector mode. This is because rotation
+	 * mode runs if( z < 0) whereas vector mode runs if (y >= 0)
+	 */
 	if (mode == ROTATION)
 	{
 		return result;
@@ -69,49 +72,28 @@ int rot_decision(cordic_mode_t mode, void * val)
  * x: The x coordinate in the vector.
  * y: The y coordinate in the vector.
  * z: The angle accumulator. Reaches 0 after n iterations
- */ 
-vector3 cordic_rotation(int x, int y, int z)
-{
-	int i;
-	int x_temp;
-	
-	x = x << SHIFT;
-	y = y << SHIFT;
-	z = z << SHIFT;
-	
-	for (i = 0; i < ELEM_SIZE; i++)
-	{
-		x_temp = x;
-		if (z < 0)
-		{
-			x = x + (y >> i);
-			y = y - (x_temp >> i);
-			z = z + float_to_fixed(elem_angle[i]); 
-		} else {
-			x = x - (y >> i);
-			y = y + (x_temp >> i);
-			z = z - float_to_fixed(elem_angle[i]);
-		}
-	}
-
-	vector3 result;
-	result.x = x;
-	result.y = y;
-	result.z = z;
-	return result;
-}
-
-/* Much like cordic_rotation mode. The only difference
+ * 
+ * Cordic in vector mode. The only difference
  * is the condiition in the middle of the for loop. Need
  * to make everything in fixed point arithmetic.
  * x: The x coordinate of the vector.
  * y: The y coordinate of the vector. Reaches 0 after n iterations.
  * z: The angle accumulator. Reaches z[0] + arctan(y[0]/x[0]) after n iterations.
- */
-vector3 cordic_vector(int x, int y, int z)
+ */ 
+vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 {
 	int i;
 	int x_temp;
+	int * val;
+
+	// If the mode is rotation, our check for rotation direction is on the z value, but
+	// if it is in vector, it is on the y value.
+	if (mode == ROTATION)
+	{
+		val = &z;
+	} else {
+		val = &y;
+	}
 	
 	x = x << SHIFT;
 	y = y << SHIFT;
@@ -120,35 +102,22 @@ vector3 cordic_vector(int x, int y, int z)
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
 		x_temp = x;
-		if (y >= 0)
+		if (rot_decision(mode, *val))
 		{
 			x = x + (y >> i);
 			y = y - (x_temp >> i);
-			z = z + float_to_fixed(elem_angle[i]); 
+			z = z + float_to_fixed(elem_angle[i]); // note that the elem_angle lookup table should be in integers rather than converting every time.
 		} else {
 			x = x - (y >> i);
 			y = y + (x_temp >> i);
 			z = z - float_to_fixed(elem_angle[i]);
 		}
 	}
+
 	vector3 result;
 	result.x = x;
 	result.y = y;
 	result.z = z;
-	return result;
-}
-
-vector3 cordic(int x, int y, double z, cordic_mode_t mode)
-{
-	vector3 result;
-	if (mode == ROTATION)
-	{
-		result = cordic_rotation(x,y,z);
-	} else if (mode == VECTOR)
-	{
-		result = cordic_vector(x,y,z);
-	}
-
 	return result;
 }
 
