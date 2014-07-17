@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SHIFT 16
+#define SHIFT 8
 #define SHIFT_MASK ((1 << SHIFT ) - 1)
 
 #define ELEM_SIZE 12
 /*
  * The elementary angles for the lookup table. They correspond to
- * arctan(2^-i)
+ * arctan(2^-i) and then shifted left by 8 bits in an integer format
  */
-double elem_angle[] = {
-	45.00, 26.56, 14.04,
-	7.13, 3.58, 1.79,
-	0.89, 0.45, 0.22,
-	0.11, 0.06, 0.03
+int elem_angle[] = {
+	11520, 6799, 3594,
+	1825, 916, 458,
+	227, 115, 56,
+	28, 15, 7
 };
 
 typedef struct vector3 {
@@ -24,14 +24,17 @@ typedef struct vector3 {
 
 typedef enum {ROTATION, VECTOR} cordic_mode_t;
 
-double fixed_to_float(int fixed)
+// This does work
+float fixed_to_float(int fixed)
 {
-	return ( (double) (fixed & SHIFT_MASK) / (1 << SHIFT) );
+	return fixed /256.0;
+	//return ( (float) (fixed & SHIFT_MASK) / (1 << SHIFT) );
+	//return *(float *)&fixed;
 }
 
-int float_to_fixed(double flt)
+int float_to_fixed(float flt)
 {
-	return (int)(flt * 65536);
+	return (int)(flt * 256);
 }
 
 /*
@@ -104,15 +107,22 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 		x_temp = x;
 		if (rot_decision(mode, *val))
 		{
+		//	printf("Z < 0 TOTALLY TRUE\t\t");
 			x = x + (y >> i);
 			y = y - (x_temp >> i);
-			z = z + float_to_fixed(elem_angle[i]); // note that the elem_angle lookup table should be in integers rather than converting every time.
+			z = z + elem_angle[i]; 
 		} else {
+		//	printf("Z < 0 FANTASTICALLY FALSE\t\t");
 			x = x - (y >> i);
 			y = y + (x_temp >> i);
-			z = z - float_to_fixed(elem_angle[i]);
+			z = z - elem_angle[i];
 		}
+		//printf("X: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(z));
 	}
+
+	 // x = x >> SHIFT;
+	 // y = y >> SHIFT;
+	 // z = z >> SHIFT;
 
 	vector3 result;
 	result.x = x;
@@ -121,22 +131,23 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 	return result;
 }
 
-double cos_cordic(int theta)
+//This is returning the incorrect result
+float cos_cordic(int theta)
 {
 	return fixed_to_float(cordic(1,0,theta, ROTATION).x);
 }
 
-double sin_cordic(int theta)
+float sin_cordic(int theta)
 {
 	return fixed_to_float(cordic(1,0,theta, ROTATION).y);
 }
 
-double arctan_div_cordic(int x, int y)
+float arctan_div_cordic(int x, int y)
 {
 	return fixed_to_float(cordic(x,y,0, VECTOR).z);
 }
 
-double arctan_cordic(int x)
+float arctan_cordic(int x)
 {
 	return fixed_to_float(cordic(1,x,0, VECTOR).z);
 }
@@ -146,14 +157,14 @@ void testing()
 	int i;
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
-		printf("i: %d rep %d",i, float_to_fixed(elem_angle[i]));
+		printf("i: %d rep %d\n",i, float_to_fixed(elem_angle[i]));
 	}
 }
 
 int main()
 {
-	//testing();
 	printf("Cos(45): %f\n", cos_cordic(45));
+	printf("Cos(30): %f\n", cos_cordic(30));
 	printf("Sin(90): %f\n", sin_cordic(90));
 	printf("Arctan(5/4): %f\n", arctan_div_cordic(4,5));
 	printf("Arctan(2): %f\n", arctan_cordic(2));
