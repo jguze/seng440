@@ -4,6 +4,8 @@
 #define SHIFT 8
 #define SHIFT_MASK ((1 << SHIFT ) - 1)
 
+#define SCALE_CONSTANT 1.64676
+
 #define ELEM_SIZE 12
 /*
  * The elementary angles for the lookup table. They correspond to
@@ -70,6 +72,10 @@ int rot_decision(cordic_mode_t mode, int val)
  * Cordic in rotation mode. The only difference between this and cordic
  * vector mode is the if condition in the for loop. Look at the slides
  * to better understand the formula. x and y are shifted to the left by
+v
+
+r
+q
  * 8 to give it better precision, but proper fixed point arithmetic hasn'table
  * been implemented
  * x: The x coordinate in the vector.
@@ -117,13 +123,17 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
-		//printf("X: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(z));
+		//printf("X: %f, Y: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(y), fixed_to_float(z));
 	}
 
 	 // x = x >> SHIFT;
 	 // y = y >> SHIFT;
 	 // z = z >> SHIFT;
 
+	//x /= SCALE_CONSTANT;
+	//y /= SCALE_CONSTANT;
+	//z /= SCALE_CONSTANT;
+	//printf("X: %f, Y: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(y), fixed_to_float(z));
 	vector3 result;
 	result.x = x;
 	result.y = y;
@@ -134,12 +144,12 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 //This is returning the incorrect result
 float cos_cordic(int theta)
 {
-	return fixed_to_float(cordic(1,0,theta, ROTATION).x);
+	return fixed_to_float(cordic(1,0,theta, ROTATION).x) / SCALE_CONSTANT;
 }
 
 float sin_cordic(int theta)
 {
-	return fixed_to_float(cordic(1,0,theta, ROTATION).y);
+	return fixed_to_float(cordic(1,0,theta, ROTATION).y) / SCALE_CONSTANT;
 }
 
 float arctan_div_cordic(int x, int y)
