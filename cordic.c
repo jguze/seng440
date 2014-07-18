@@ -1,21 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SHIFT 8
-#define SHIFT_MASK ((1 << SHIFT ) - 1)
+#define SHIFT 16
+#define SHIFT_FLOAT 65536.0
+#define SHIFT_BASE 65536
 
 #define SCALE_CONSTANT 1.64676
 
-#define ELEM_SIZE 12
+#define ELEM_SIZE 16
 /*
  * The elementary angles for the lookup table. They correspond to
  * arctan(2^-i) and then shifted left by 8 bits in an integer format
  */
 int elem_angle[] = {
-	11520, 6799, 3594,
-	1825, 916, 458,
-	227, 115, 56,
-	28, 15, 7
+	2949120,
+	1740967,
+	919789,
+	466945,
+	234379,
+	117304,
+	58666,
+	29335,
+	14668,
+	7334,
+	3667,
+	1833,
+	917,
+	458,
+	229,
+	115,
+	57
 };
 
 typedef struct vector3 {
@@ -29,14 +43,12 @@ typedef enum {ROTATION, VECTOR} cordic_mode_t;
 // This does work
 float fixed_to_float(int fixed)
 {
-	return fixed /256.0;
-	//return ( (float) (fixed & SHIFT_MASK) / (1 << SHIFT) );
-	//return *(float *)&fixed;
+	return fixed / SHIFT_FLOAT;
 }
 
 int float_to_fixed(float flt)
 {
-	return (int)(flt * 256);
+	return (int)(flt * SHIFT_BASE);
 }
 
 /*
@@ -164,15 +176,20 @@ float arctan_cordic(int x)
 
 void testing()
 {
+	printf("%d bytes to a int\n", sizeof(int));
+	printf("%d bytes to a long\n", sizeof(long));
+	printf("%d bytes to a long int\n", sizeof(long int));
+	printf("%d bytes to a long long\n", sizeof(long long));
 	int i;
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
-		printf("i: %d rep %d\n",i, float_to_fixed(elem_angle[i]));
+		printf("i: %d rep %lf\n",i, fixed_to_float(elem_angle[i]));
 	}
 }
 
 int main()
 {
+	testing();
 	printf("Cos(45): %f\n", cos_cordic(45));
 	printf("Cos(30): %f\n", cos_cordic(30));
 	printf("Sin(90): %f\n", sin_cordic(90));
