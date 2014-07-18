@@ -7,7 +7,7 @@
 
 #define SCALE_CONSTANT 1.64676
 
-#define ELEM_SIZE 16
+#define ELEM_SIZE 23
 /*
  * The elementary angles for the lookup table. They correspond to
  * arctan(2^-i) and then shifted left by 8 bits in an integer format
@@ -17,19 +17,30 @@ int elem_angle[] = {
 	1740967,
 	919789,
 	466945,
+
 	234379,
 	117304,
 	58666,
 	29335,
+	
 	14668,
 	7334,
 	3667,
 	1833,
+	
 	917,
 	458,
 	229,
 	115,
-	57
+	
+	57,
+	29,
+	14,
+	7,
+	
+	4, 
+	2,
+	1
 };
 
 typedef struct vector3 {
@@ -41,12 +52,12 @@ typedef struct vector3 {
 typedef enum {ROTATION, VECTOR} cordic_mode_t;
 
 // This does work
-float fixed_to_float(int fixed)
+double fixed_to_float(int fixed)
 {
 	return fixed / SHIFT_FLOAT;
 }
 
-int float_to_fixed(float flt)
+int float_to_fixed(double flt)
 {
 	return (int)(flt * SHIFT_BASE);
 }
@@ -154,22 +165,22 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 }
 
 //This is returning the incorrect result
-float cos_cordic(int theta)
+double cos_cordic(int theta)
 {
 	return fixed_to_float(cordic(1,0,theta, ROTATION).x) / SCALE_CONSTANT;
 }
 
-float sin_cordic(int theta)
+double sin_cordic(int theta)
 {
 	return fixed_to_float(cordic(1,0,theta, ROTATION).y) / SCALE_CONSTANT;
 }
 
-float arctan_div_cordic(int x, int y)
+double arctan_div_cordic(int x, int y)
 {
 	return fixed_to_float(cordic(x,y,0, VECTOR).z);
 }
 
-float arctan_cordic(int x)
+double arctan_cordic(int x)
 {
 	return fixed_to_float(cordic(1,x,0, VECTOR).z);
 }
@@ -190,10 +201,10 @@ void testing()
 int main()
 {
 	testing();
-	printf("Cos(45): %f\n", cos_cordic(45));
-	printf("Cos(30): %f\n", cos_cordic(30));
-	printf("Sin(90): %f\n", sin_cordic(90));
-	printf("Arctan(5/4): %f\n", arctan_div_cordic(4,5));
-	printf("Arctan(2): %f\n", arctan_cordic(2));
+	printf("Cos(45): %.15lf\n", cos_cordic(45));
+	printf("Cos(30): %.15lf\n", cos_cordic(30));
+	printf("Sin(90): %.15lf\n", sin_cordic(90));
+	printf("Arctan(5/4): %.15lf\n", arctan_div_cordic(4,5));
+	printf("Arctan(2): %.15lf\n", arctan_cordic(2));
 	return 0;
 }
