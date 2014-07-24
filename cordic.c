@@ -136,27 +136,15 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 		x_temp = x;
 		if (rot_decision(mode, *val))
 		{
-		//	printf("Z < 0 TOTALLY TRUE\t\t");
 			x = x + (y >> i);
 			y = y - (x_temp >> i);
 			z = z + elem_angle[i]; 
 		} else {
-		//	printf("Z < 0 FANTASTICALLY FALSE\t\t");
 			x = x - (y >> i);
 			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
-		//printf("X: %f, Y: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(y), fixed_to_float(z));
 	}
-
-	 // x = x >> SHIFT;
-	 // y = y >> SHIFT;
-	 // z = z >> SHIFT;
-
-	//x /= SCALE_CONSTANT;
-	//y /= SCALE_CONSTANT;
-	//z /= SCALE_CONSTANT;
-	//printf("X: %f, Y: %f, Z: %f\n", fixed_to_float(x), fixed_to_float(y), fixed_to_float(z));
 	vector3 result;
 	result.x = x;
 	result.y = y;
@@ -164,7 +152,6 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 	return result;
 }
 
-//This is returning the incorrect result
 double cos_cordic(int theta)
 {
 	return fixed_to_float(cordic(1,0,theta, ROTATION).x) / SCALE_CONSTANT;
@@ -185,22 +172,8 @@ double arctan_cordic(int x)
 	return fixed_to_float(cordic(1,x,0, VECTOR).z);
 }
 
-void testing()
-{
-	printf("%d bytes to a int\n", sizeof(int));
-	printf("%d bytes to a long\n", sizeof(long));
-	printf("%d bytes to a long int\n", sizeof(long int));
-	printf("%d bytes to a long long\n", sizeof(long long));
-	int i;
-	for (i = 0; i < ELEM_SIZE; i++)
-	{
-		printf("i: %d rep %lf\n",i, fixed_to_float(elem_angle[i]));
-	}
-}
-
 int main()
 {
-	testing();
 	printf("Cos(45): %.15lf\n", cos_cordic(45));
 	printf("Cos(30): %.15lf\n", cos_cordic(30));
 	printf("Sin(90): %.15lf\n", sin_cordic(90));
