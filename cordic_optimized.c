@@ -21,11 +21,6 @@ double fixed_to_float(int fixed)
 	return fixed / SHIFT_FLOAT;
 }
 
-int float_to_fixed(double flt)
-{
-	return (int)(flt * SHIFT_BASE);
-}
-
 /**
  * Cordic in rotation mode. The only difference between this and cordic
  * vector mode is the if condition in the for loop. Look at the slides
@@ -82,7 +77,7 @@ vector2 cordic_rotation(register int x, register int y, register int z)
 	z = z << SHIFT;
 	
 	// Loop unrolling x2
-	for (i = ELEM_SIZE; i != 0; i-=2)
+	for (i = 0; i != ELEM_SIZE; i++)
 	{
 		x_temp = x;
 		if (z < 0)
@@ -95,6 +90,8 @@ vector2 cordic_rotation(register int x, register int y, register int z)
 			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
+
+		i++;
 		x_temp = x;
 		if (z < 0)
 		{
@@ -168,7 +165,7 @@ int cordic_vector(register int x, register int y, register int z)
 	z = z << SHIFT;
 	
 	// Loop unrolling x2
-	for (i = ELEM_SIZE; i != 0; i-=2)
+	for (i = 0; i != ELEM_SIZE; i++)
 	{
 		x_temp = x;
 		if (y >= 0)
@@ -181,6 +178,8 @@ int cordic_vector(register int x, register int y, register int z)
 			y = y + (x_temp >> i);
 			z = z - elem_angle[i];
 		}
+
+		i++;
 		x_temp = x;
 		if (y >= 0)
 		{
