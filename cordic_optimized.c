@@ -5,9 +5,11 @@
 #define SHIFT_FLOAT 65536.0
 #define SHIFT_BASE 65536
 
-#define SCALE_CONSTANT 1.64676
+#define SCALE_CONSTANT 19898 //Inverse of the Scale Constant in fixed point (2^16)
+#define SCALE_BASE 15
 
-#define ELEM_SIZE 22
+
+#define ELEM_SIZE 22 //23 Its actually 23 but we use 22 for the loop condition.
 
 
 typedef struct vector2 {
@@ -105,6 +107,19 @@ vector2 cordic_rotation(register int x, register int y, register int z)
 		}
 	}
 
+	i++;
+	x_temp = x;
+	if (z < 0)
+	{
+		x = x + (y >> i);
+		y = y - (x_temp >> i);
+		z = z + elem_angle[i]; 
+	} else {
+		x = x - (y >> i);
+		y = y + (x_temp >> i);
+		z = z - elem_angle[i];
+	}
+
 	vector2 result;
 	result.x = x;
 	result.y = y;
@@ -193,35 +208,50 @@ int cordic_vector(register int x, register int y, register int z)
 		}
 	}
 
+	i++;
+	x_temp = x;
+	if (y >= 0)
+	{
+		x = x + (y >> i);
+		y = y - (x_temp >> i);
+		z = z + elem_angle[i]; 
+	} else {
+		x = x - (y >> i);
+		y = y + (x_temp >> i);
+		z = z - elem_angle[i];
+	}
+
 	return z;
 }
 
-double cos_cordic(int theta)
+int cos_cordic(int theta)
 {
-	return fixed_to_float(cordic_rotation(1,0,theta).x) / SCALE_CONSTANT;
+	return (cordic_rotation(1,0,theta).x * SCALE_CONSTANT) >> SCALE_BASE;
 }
 
-double sin_cordic(int theta)
+int sin_cordic(int theta)
 {
-	return fixed_to_float(cordic_rotation(1,0,theta).y) / SCALE_CONSTANT;
+	return (cordic_rotation(1,0,theta).y * SCALE_CONSTANT) >> SCALE_BASE;
 }
 
-double arctan_div_cordic(int x, int y)
+int arctan_div_cordic(int x, int y)
 {
-	return fixed_to_float(cordic_vector(x,y,0));
+	return cordic_vector(x,y,0);
 }
 
-double arctan_cordic(int x)
+int arctan_cordic(int x)
 {
-	return fixed_to_float(cordic_vector(1,x,0));
+	return cordic_vector(1,x,0);
 }
 
 int main()
 {
-	printf("Cos(45): %.15lf\n", cos_cordic(45));
-	printf("Cos(30): %.15lf\n", cos_cordic(30));
-	printf("Sin(90): %.15lf\n", sin_cordic(90));
-	printf("Arctan(5/4): %.15lf\n", arctan_div_cordic(4,5));
-	printf("Arctan(2): %.15lf\n", arctan_cordic(2));
+	printf("Cos(1): %.15lf\n", fixed_to_float(cos_cordic(1)));
+	printf("Cos(20): %.15lf\n", fixed_to_float(cos_cordic(20)));
+	printf("Cos(45): %.15lf\n", fixed_to_float(cos_cordic(45)));
+	printf("Cos(30): %.15lf\n", fixed_to_float(cos_cordic(30)));
+	printf("Sin(90): %.15lf\n", fixed_to_float(sin_cordic(90)));
+	printf("Arctan(5/4): %.15lf\n", fixed_to_float(arctan_div_cordic(4,5)));
+	printf("Arctan(2): %.15lf\n", fixed_to_float(arctan_cordic(2)));
 	return 0;
 }
