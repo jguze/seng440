@@ -86,7 +86,7 @@ cordic_rotation:
 	str	r1, [fp, #-124]
 	str	r2, [fp, #-128]
 	str	r3, [fp, #-132]
-	ldr	r3, .L11
+	ldr	r3, .L13
 	sub	r2, fp, #96
 	mov	ip, #92
 	mov	r0, r2
@@ -220,10 +220,63 @@ cordic_rotation:
 	ldr	r1, [fp, #-116]
 	cmp	r1, #22
 	bne	.L9
+	ldr	r2, [fp, #-116]
+	add	r2, r2, #1
+	str	r2, [fp, #-116]
+	ldr	r3, [fp, #-124]
+	str	r3, [fp, #-112]
+	ldr	r1, [fp, #-132]
+	cmp	r1, #0
+	bge	.L10
+	ldr	r2, [fp, #-128]
+	ldr	r1, [fp, #-116]
+	mov	r3, r2, asr r1
 	ldr	r2, [fp, #-124]
-	str	r2, [fp, #-104]
-	ldr	r3, [fp, #-128]
-	str	r3, [fp, #-100]
+	add	r2, r2, r3
+	str	r2, [fp, #-124]
+	ldr	r1, [fp, #-112]
+	ldr	r2, [fp, #-116]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-128]
+	rsb	r1, r3, r1
+	str	r1, [fp, #-128]
+	ldr	r3, [fp, #-116]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-132]
+	add	r2, r2, r3
+	b	.L11
+.L10:
+	ldr	r1, [fp, #-128]
+	ldr	r2, [fp, #-116]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-124]
+	rsb	r1, r3, r1
+	str	r1, [fp, #-124]
+	ldr	r2, [fp, #-112]
+	ldr	r1, [fp, #-116]
+	mov	r3, r2, asr r1
+	ldr	r2, [fp, #-128]
+	add	r2, r2, r3
+	str	r2, [fp, #-128]
+	ldr	r3, [fp, #-116]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-132]
+	rsb	r2, r3, r2
+.L11:
+	ldr	r3, [fp, #-124]
+	str	r3, [fp, #-104]
+	ldr	r1, [fp, #-128]
+	str	r1, [fp, #-100]
 	ldr	r2, [fp, #-120]
 	sub	r3, fp, #104
 	ldmia	r3, {r0, r1}
@@ -232,16 +285,16 @@ cordic_rotation:
 	sub	sp, fp, #4
 	ldmfd	sp!, {fp, lr}
 	bx	lr
-.L12:
+.L14:
 	.align	2
-.L11:
+.L13:
 	.word	C.0.2114
 	.size	cordic_rotation, .-cordic_rotation
 	.section	.rodata
 	.align	2
-	.type	C.5.2154, %object
-	.size	C.5.2154, 92
-C.5.2154:
+	.type	C.7.2165, %object
+	.size	C.7.2165, 92
+C.7.2165:
 	.word	2949120
 	.word	1740967
 	.word	919789
@@ -279,7 +332,7 @@ cordic_vector:
 	str	r0, [fp, #-112]
 	str	r1, [fp, #-116]
 	str	r2, [fp, #-120]
-	ldr	r3, .L21
+	ldr	r3, .L25
 	sub	r2, fp, #96
 	mov	ip, #92
 	mov	r0, r2
@@ -297,67 +350,12 @@ cordic_vector:
 	str	r3, [fp, #-120]
 	mov	r1, #0
 	str	r1, [fp, #-108]
-	b	.L14
-.L19:
+	b	.L16
+.L21:
 	ldr	r2, [fp, #-112]
 	str	r2, [fp, #-104]
 	ldr	r3, [fp, #-116]
 	cmp	r3, #0
-	blt	.L15
-	ldr	r1, [fp, #-116]
-	ldr	r2, [fp, #-108]
-	mov	r3, r1, asr r2
-	ldr	r1, [fp, #-112]
-	add	r1, r1, r3
-	str	r1, [fp, #-112]
-	ldr	r2, [fp, #-104]
-	ldr	r1, [fp, #-108]
-	mov	r3, r2, asr r1
-	ldr	r2, [fp, #-116]
-	rsb	r2, r3, r2
-	str	r2, [fp, #-116]
-	ldr	r3, [fp, #-108]
-	mvn	r2, #91
-	mov	r3, r3, asl #2
-	sub	r1, fp, #4
-	add	r3, r1, r3
-	add	r3, r3, r2
-	ldr	r3, [r3, #0]
-	ldr	r2, [fp, #-120]
-	add	r2, r2, r3
-	str	r2, [fp, #-120]
-	b	.L16
-.L15:
-	ldr	r1, [fp, #-116]
-	ldr	r2, [fp, #-108]
-	mov	r3, r1, asr r2
-	ldr	r1, [fp, #-112]
-	rsb	r1, r3, r1
-	str	r1, [fp, #-112]
-	ldr	r2, [fp, #-104]
-	ldr	r1, [fp, #-108]
-	mov	r3, r2, asr r1
-	ldr	r2, [fp, #-116]
-	add	r2, r2, r3
-	str	r2, [fp, #-116]
-	ldr	r3, [fp, #-108]
-	mvn	r2, #91
-	mov	r3, r3, asl #2
-	sub	r1, fp, #4
-	add	r3, r1, r3
-	add	r3, r3, r2
-	ldr	r3, [r3, #0]
-	ldr	r2, [fp, #-120]
-	rsb	r2, r3, r2
-	str	r2, [fp, #-120]
-.L16:
-	ldr	r3, [fp, #-108]
-	add	r3, r3, #1
-	str	r3, [fp, #-108]
-	ldr	r1, [fp, #-112]
-	str	r1, [fp, #-104]
-	ldr	r2, [fp, #-116]
-	cmp	r2, #0
 	blt	.L17
 	ldr	r1, [fp, #-116]
 	ldr	r2, [fp, #-108]
@@ -409,19 +407,125 @@ cordic_vector:
 	ldr	r3, [fp, #-108]
 	add	r3, r3, #1
 	str	r3, [fp, #-108]
-.L14:
+	ldr	r1, [fp, #-112]
+	str	r1, [fp, #-104]
+	ldr	r2, [fp, #-116]
+	cmp	r2, #0
+	blt	.L19
+	ldr	r1, [fp, #-116]
+	ldr	r2, [fp, #-108]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-112]
+	add	r1, r1, r3
+	str	r1, [fp, #-112]
+	ldr	r2, [fp, #-104]
+	ldr	r1, [fp, #-108]
+	mov	r3, r2, asr r1
+	ldr	r2, [fp, #-116]
+	rsb	r2, r3, r2
+	str	r2, [fp, #-116]
+	ldr	r3, [fp, #-108]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-120]
+	add	r2, r2, r3
+	str	r2, [fp, #-120]
+	b	.L20
+.L19:
+	ldr	r1, [fp, #-116]
+	ldr	r2, [fp, #-108]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-112]
+	rsb	r1, r3, r1
+	str	r1, [fp, #-112]
+	ldr	r2, [fp, #-104]
+	ldr	r1, [fp, #-108]
+	mov	r3, r2, asr r1
+	ldr	r2, [fp, #-116]
+	add	r2, r2, r3
+	str	r2, [fp, #-116]
+	ldr	r3, [fp, #-108]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-120]
+	rsb	r2, r3, r2
+	str	r2, [fp, #-120]
+.L20:
+	ldr	r3, [fp, #-108]
+	add	r3, r3, #1
+	str	r3, [fp, #-108]
+.L16:
 	ldr	r1, [fp, #-108]
 	cmp	r1, #22
-	bne	.L19
+	bne	.L21
+	ldr	r2, [fp, #-108]
+	add	r2, r2, #1
+	str	r2, [fp, #-108]
+	ldr	r3, [fp, #-112]
+	str	r3, [fp, #-104]
+	ldr	r1, [fp, #-116]
+	cmp	r1, #0
+	blt	.L22
+	ldr	r2, [fp, #-116]
+	ldr	r1, [fp, #-108]
+	mov	r3, r2, asr r1
+	ldr	r2, [fp, #-112]
+	add	r2, r2, r3
+	ldr	r1, [fp, #-104]
+	ldr	r2, [fp, #-108]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-116]
+	rsb	r1, r3, r1
+	ldr	r3, [fp, #-108]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-120]
+	add	r2, r2, r3
+	str	r2, [fp, #-120]
+	b	.L23
+.L22:
+	ldr	r1, [fp, #-116]
+	ldr	r2, [fp, #-108]
+	mov	r3, r1, asr r2
+	ldr	r1, [fp, #-112]
+	rsb	r1, r3, r1
+	ldr	r2, [fp, #-104]
+	ldr	r1, [fp, #-108]
+	mov	r3, r2, asr r1
+	ldr	r2, [fp, #-116]
+	add	r2, r2, r3
+	ldr	r3, [fp, #-108]
+	mvn	r2, #91
+	mov	r3, r3, asl #2
+	sub	r1, fp, #4
+	add	r3, r1, r3
+	add	r3, r3, r2
+	ldr	r3, [r3, #0]
+	ldr	r2, [fp, #-120]
+	rsb	r2, r3, r2
+	str	r2, [fp, #-120]
+.L23:
 	ldr	r3, [fp, #-120]
 	mov	r0, r3
 	sub	sp, fp, #4
 	ldmfd	sp!, {fp, lr}
 	bx	lr
-.L22:
+.L26:
 	.align	2
-.L21:
-	.word	C.5.2154
+.L25:
+	.word	C.7.2165
 	.size	cordic_vector, .-cordic_vector
 	.align	2
 	.global	cos_cordic
@@ -430,40 +534,34 @@ cos_cordic:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 1, uses_anonymous_args = 0
-	stmfd	sp!, {r4, r5, r6, fp, lr}
-	add	fp, sp, #16
-	sub	sp, sp, #20
-	str	r0, [fp, #-32]
-	sub	r3, fp, #28
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #16
+	str	r0, [fp, #-16]
+	sub	r3, fp, #12
 	mov	r0, r3
 	mov	r1, #1
 	mov	r2, #0
-	ldr	r3, [fp, #-32]
+	ldr	r3, [fp, #-16]
 	bl	cordic_rotation
-	ldr	r3, [fp, #-28]
+	ldr	r1, [fp, #-12]
+	mov	r3, r1
+	mov	r3, r3, asl #3
+	mov	r2, r3, asl #2
+	add	r3, r3, r2
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #3
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #3
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #2
+	add	r3, r3, r1
+	mov	r3, r3, asl #1
+	mov	r3, r3, asr #15
 	mov	r0, r3
-	bl	fixed_to_float
-	mov	r3, r0
-	mov	r4, r1
-	adr	r6, .L25
-	ldmia	r6, {r5-r6}
-	mov	r0, r3
-	mov	r1, r4
-	mov	r2, r5
-	mov	r3, r6
-	bl	__aeabi_ddiv
-	mov	r3, r0
-	mov	r4, r1
-	mov	r0, r3
-	mov	r1, r4
-	sub	sp, fp, #16
-	ldmfd	sp!, {r4, r5, r6, fp, lr}
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, lr}
 	bx	lr
-.L26:
-	.align	3
-.L25:
-	.word	59098750
-	.word	1073371425
 	.size	cos_cordic, .-cos_cordic
 	.align	2
 	.global	sin_cordic
@@ -472,40 +570,34 @@ sin_cordic:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 1, uses_anonymous_args = 0
-	stmfd	sp!, {r4, r5, r6, fp, lr}
-	add	fp, sp, #16
-	sub	sp, sp, #20
-	str	r0, [fp, #-32]
-	sub	r3, fp, #28
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #16
+	str	r0, [fp, #-16]
+	sub	r3, fp, #12
 	mov	r0, r3
 	mov	r1, #1
 	mov	r2, #0
-	ldr	r3, [fp, #-32]
+	ldr	r3, [fp, #-16]
 	bl	cordic_rotation
-	ldr	r3, [fp, #-24]
+	ldr	r1, [fp, #-8]
+	mov	r3, r1
+	mov	r3, r3, asl #3
+	mov	r2, r3, asl #2
+	add	r3, r3, r2
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #3
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #3
+	rsb	r3, r1, r3
+	mov	r3, r3, asl #2
+	add	r3, r3, r1
+	mov	r3, r3, asl #1
+	mov	r3, r3, asr #15
 	mov	r0, r3
-	bl	fixed_to_float
-	mov	r3, r0
-	mov	r4, r1
-	adr	r6, .L29
-	ldmia	r6, {r5-r6}
-	mov	r0, r3
-	mov	r1, r4
-	mov	r2, r5
-	mov	r3, r6
-	bl	__aeabi_ddiv
-	mov	r3, r0
-	mov	r4, r1
-	mov	r0, r3
-	mov	r1, r4
-	sub	sp, fp, #16
-	ldmfd	sp!, {r4, r5, r6, fp, lr}
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, lr}
 	bx	lr
-.L30:
-	.align	3
-.L29:
-	.word	59098750
-	.word	1073371425
 	.size	sin_cordic, .-sin_cordic
 	.align	2
 	.global	arctan_div_cordic
@@ -514,24 +606,19 @@ arctan_div_cordic:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 8
 	@ frame_needed = 1, uses_anonymous_args = 0
-	stmfd	sp!, {r4, fp, lr}
-	add	fp, sp, #8
-	sub	sp, sp, #12
-	str	r0, [fp, #-16]
-	str	r1, [fp, #-20]
-	ldr	r0, [fp, #-16]
-	ldr	r1, [fp, #-20]
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #8
+	str	r0, [fp, #-8]
+	str	r1, [fp, #-12]
+	ldr	r0, [fp, #-8]
+	ldr	r1, [fp, #-12]
 	mov	r2, #0
 	bl	cordic_vector
 	mov	r3, r0
 	mov	r0, r3
-	bl	fixed_to_float
-	mov	r3, r0
-	mov	r4, r1
-	mov	r0, r3
-	mov	r1, r4
-	sub	sp, fp, #8
-	ldmfd	sp!, {r4, fp, lr}
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, lr}
 	bx	lr
 	.size	arctan_div_cordic, .-arctan_div_cordic
 	.align	2
@@ -541,40 +628,41 @@ arctan_cordic:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 8
 	@ frame_needed = 1, uses_anonymous_args = 0
-	stmfd	sp!, {r4, fp, lr}
-	add	fp, sp, #8
-	sub	sp, sp, #12
-	str	r0, [fp, #-16]
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #8
+	str	r0, [fp, #-8]
 	mov	r0, #1
-	ldr	r1, [fp, #-16]
+	ldr	r1, [fp, #-8]
 	mov	r2, #0
 	bl	cordic_vector
 	mov	r3, r0
 	mov	r0, r3
-	bl	fixed_to_float
-	mov	r3, r0
-	mov	r4, r1
-	mov	r0, r3
-	mov	r1, r4
-	sub	sp, fp, #8
-	ldmfd	sp!, {r4, fp, lr}
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, lr}
 	bx	lr
 	.size	arctan_cordic, .-arctan_cordic
 	.section	.rodata
 	.align	2
 .LC0:
-	.ascii	"Cos(45): %.15lf\012\000"
+	.ascii	"Cos(1): %.15lf\012\000"
 	.align	2
 .LC1:
-	.ascii	"Cos(30): %.15lf\012\000"
+	.ascii	"Cos(20): %.15lf\012\000"
 	.align	2
 .LC2:
-	.ascii	"Sin(90): %.15lf\012\000"
+	.ascii	"Cos(45): %.15lf\012\000"
 	.align	2
 .LC3:
-	.ascii	"Arctan(5/4): %.15lf\012\000"
+	.ascii	"Cos(30): %.15lf\012\000"
 	.align	2
 .LC4:
+	.ascii	"Sin(90): %.15lf\012\000"
+	.align	2
+.LC5:
+	.ascii	"Arctan(5/4): %.15lf\012\000"
+	.align	2
+.LC6:
 	.ascii	"Arctan(2): %.15lf\012\000"
 	.text
 	.align	2
@@ -586,27 +674,58 @@ main:
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {r4, r5, fp, lr}
 	add	fp, sp, #12
-	mov	r0, #45
+	mov	r0, #1
 	bl	cos_cordic
+	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
 	mov	r3, r0
 	mov	r4, r1
 	ldr	r0, .L37
 	mov	r2, r3
 	mov	r3, r4
 	bl	printf
-	mov	r0, #30
+	mov	r0, #20
 	bl	cos_cordic
+	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
 	mov	r3, r0
 	mov	r4, r1
 	ldr	r0, .L37+4
 	mov	r2, r3
 	mov	r3, r4
 	bl	printf
-	mov	r0, #90
-	bl	sin_cordic
+	mov	r0, #45
+	bl	cos_cordic
+	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
 	mov	r3, r0
 	mov	r4, r1
 	ldr	r0, .L37+8
+	mov	r2, r3
+	mov	r3, r4
+	bl	printf
+	mov	r0, #30
+	bl	cos_cordic
+	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
+	mov	r3, r0
+	mov	r4, r1
+	ldr	r0, .L37+12
+	mov	r2, r3
+	mov	r3, r4
+	bl	printf
+	mov	r0, #90
+	bl	sin_cordic
+	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
+	mov	r3, r0
+	mov	r4, r1
+	ldr	r0, .L37+16
 	mov	r2, r3
 	mov	r3, r4
 	bl	printf
@@ -614,16 +733,22 @@ main:
 	mov	r1, #5
 	bl	arctan_div_cordic
 	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
+	mov	r3, r0
 	mov	r4, r1
-	ldr	r0, .L37+12
+	ldr	r0, .L37+20
 	mov	r2, r3
 	mov	r3, r4
 	bl	printf
 	mov	r0, #2
 	bl	arctan_cordic
 	mov	r3, r0
+	mov	r0, r3
+	bl	fixed_to_float
+	mov	r3, r0
 	mov	r4, r1
-	ldr	r0, .L37+16
+	ldr	r0, .L37+24
 	mov	r2, r3
 	mov	r3, r4
 	bl	printf
@@ -640,6 +765,8 @@ main:
 	.word	.LC2
 	.word	.LC3
 	.word	.LC4
+	.word	.LC5
+	.word	.LC6
 	.size	main, .-main
 	.ident	"GCC: (Sourcery G++ Lite 2008q3-72) 4.3.2"
 	.section	.note.GNU-stack,"",%progbits
