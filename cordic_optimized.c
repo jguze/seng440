@@ -23,6 +23,12 @@ double fixed_to_float(int fixed)
 	return fixed / SHIFT_FLOAT;
 }
 
+//FLoat to Fix
+int ftfixed(double flt)
+{
+	return (int)(flt * SHIFT_BASE);
+}
+
 /**
  * Cordic in rotation mode. The only difference between this and cordic
  * vector mode is the if condition in the for loop. Look at the slides
@@ -73,10 +79,6 @@ vector2 cordic_rotation(register int x, register int y, register int z)
 		2,
 		1
 	};
-	
-	x = x << SHIFT;
-	y = y << SHIFT;
-	z = z << SHIFT;
 	
 	// Loop unrolling x2
 	for (i = 0; i != ELEM_SIZE; i++)
@@ -174,11 +176,7 @@ int cordic_vector(register int x, register int y, register int z)
 		2,
 		1
 	};
-	
-	x = x << SHIFT;
-	y = y << SHIFT;
-	z = z << SHIFT;
-	
+
 	// Loop unrolling x2
 	for (i = 0; i != ELEM_SIZE; i++)
 	{
@@ -224,34 +222,39 @@ int cordic_vector(register int x, register int y, register int z)
 	return z;
 }
 
-int cos_cordic(int theta)
+float cos_cordic(float theta)
 {
-	return (cordic_rotation(1,0,theta).x * SCALE_CONSTANT) >> SCALE_BASE;
+	int i_theta = ftfixed(theta);
+	return fixed_to_float((cordic_rotation(SHIFT_BASE,0, i_theta).x * SCALE_CONSTANT) >> SCALE_BASE);
 }
 
-int sin_cordic(int theta)
+float sin_cordic(float theta)
 {
-	return (cordic_rotation(1,0,theta).y * SCALE_CONSTANT) >> SCALE_BASE;
+	int i_theta = ftfixed(theta);
+	return fixed_to_float((cordic_rotation(SHIFT_BASE,0, i_theta).y * SCALE_CONSTANT) >> SCALE_BASE);
 }
 
-int arctan_div_cordic(int x, int y)
+float arctan_div_cordic(float x, float y)
 {
-	return cordic_vector(x,y,0);
+	int i_x = ftfixed(x);
+	int i_y = ftfixed(y);
+	return fixed_to_float(cordic_vector(i_x,i_y,0));
 }
 
-int arctan_cordic(int x)
+float arctan_cordic(float y)
 {
-	return cordic_vector(1,x,0);
+	int i_y = ftfixed(y);
+	return fixed_to_float(cordic_vector(SHIFT_BASE,i_y,0));
 }
 
 int main()
 {
-	printf("Cos(1): %.15lf\n", fixed_to_float(cos_cordic(1)));
-	printf("Cos(20): %.15lf\n", fixed_to_float(cos_cordic(20)));
-	printf("Cos(45): %.15lf\n", fixed_to_float(cos_cordic(45)));
-	printf("Cos(30): %.15lf\n", fixed_to_float(cos_cordic(30)));
-	printf("Sin(90): %.15lf\n", fixed_to_float(sin_cordic(90)));
-	printf("Arctan(5/4): %.15lf\n", fixed_to_float(arctan_div_cordic(4,5)));
-	printf("Arctan(2): %.15lf\n", fixed_to_float(arctan_cordic(2)));
+	printf("Cos(1): %.15lf\n", cos_cordic(1.0));
+	printf("Cos(20): %.15lf\n", cos_cordic(20.0));
+	printf("Cos(45): %.15lf\n", cos_cordic(45.0));
+	printf("Cos(30): %.15lf\n", cos_cordic(30.0));
+	printf("Sin(90): %.15lf\n", sin_cordic(90.0));
+	printf("Arctan(5/4): %.15lf\n", arctan_div_cordic(4.0,5.0));
+	printf("Arctan(2): %.15lf\n", arctan_cordic(2.0));
 	return 0;
 }
