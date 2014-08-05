@@ -26,65 +26,18 @@ the authors.
 #define SHIFT_BASE 1073741824
 
 /* Scale constant that results in rotation mode */
-#define SCALE_CONSTANT 1.64676
+//#define SCALE_CONSTANT 1.64676
+#define SCALE_CONSTANT 0.60725303
 
-#define ELEM_SIZE 31
-/*
- * The elementary angles for the lookup table. They correspond to
- * arctan(2^-i) and then shifted left by our basein an integer format
- */
-int elem_angle[] = {
-	843314857 ,
-	497837829 ,
-	263043837 ,
-	133525159 ,
-
-	67021687 ,
-	33543516 ,
-	16775851 ,
-	8388437 ,
-
-	4194283 ,
-	2097149 ,
-	1048576 ,
-	524288 ,
-
-	262144 ,
-	131072 ,
-	65536 ,
-	32768 ,
-
-	16384 ,
-	8192 ,
-	4096 ,
-	2048 ,
-
-	1024 ,
-	512 ,
-	256 ,
-	128 ,
-
-	64 ,
-	32 ,
-	16 ,
-	8 ,
-
-	4 ,
-	2 ,
-	1 ,
-};
+#define ELEM_SIZE 30
 
 /* Cordic vector containing the result vector
 	and angle accumulator resulting from the 
 	operation */
-typedef struct vector3 {
+typedef struct vector2 {
 	int x;
 	int y;
-	int z;
-} vector3;
-
-/* Modes of operation of the CORDIC calculator */
-typedef enum {ROTATION, VECTOR} cordic_mode_t;
+} vector2;
 
 /*
 Convert a CORDIC base number to a double
@@ -111,78 +64,73 @@ int normalize(double flt)
 	//our x and y values for Vectoring mode to be no larger than 
 	//the squareroot of 2. 
 	//More info available in techincal report.
-	return (int)(flt * (SHIFT_BASE * 0.7));
+	// 751619277 = SHIFT_BASE * 0.7
+	return (int)(flt * (912680550));
 }
 
-/*
- * This is to reduce our amount of code for one more if statement per
- * loop. It checks if (z < 0) and if (y >= 0).
- */
-int rot_decision(cordic_mode_t mode, int val)
+vector2 cordic_rotation(register int x, register int y, register int z)
 {
+	register int i;
+	register int x_temp;
 
-	int result;
-	if (val < 0)
-	{
-		result = 1;
-	} else {
-		result = 0;
-	}
+	int elem_angle[] = {
+		843314857 ,
+		497837829 ,
+		263043837 ,
+		133525159 ,
 
-	/* The function will return the result if we are in rotation mode,
-	 * and the opposite if we are in vector mode. This is because rotation
-	 * mode runs if( z < 0) whereas vector mode runs if (y >= 0)
-	 */
-	if (mode == ROTATION)
-	{
-		return result;
-	} else {
-		return !result;
-	}
-}
+		67021687 ,
+		33543516 ,
+		16775851 ,
+		8388437 ,
 
+		4194283 ,
+		2097149 ,
+		1048576 ,
+		524288 ,
 
-/**
- * Cordic in rotation mode. 
- * x: The x coordinate in the vector.
- * y: The y coordinate in the vector.
- * z: The angle accumulator. Reaches 0 after n iterations
- * 
- * Cordic in vector mode.
- * x: The x coordinate of the vector.
- * y: The y coordinate of the vector. Reaches 0 after n iterations.
- * z: The angle accumulator. Reaches z[0] + arctan(y[0]/x[0]) after n iterations.
+		262144 ,
+		131072 ,
+		65536 ,
+		32768 ,
 
- All values should be in CORDIC base and answers will be provided in CORDIC base.
- */ 
-vector3 cordic(int x, int y, int z, cordic_mode_t mode)
-{
-	printf("\n\n");
-	int i;
-	int x_temp;
-	int z_temp = z;
-	int * val;
+		16384 ,
+		8192 ,
+		4096 ,
+		2048 ,
 
-	//DEBUG
-	int x_orig = x;
-	int y_orig = y;
-	int z_orig = z;
+		1024 ,
+		512 ,
+		256 ,
+		128 ,
 
+		64 ,
+		32 ,
+		16 ,
+		8 ,
 
-	// If the mode is rotation, our check for rotation direction is on the z value, but
-	// if it is in vector, it is on the y value.
-	if (mode == ROTATION)
-	{
-		val = &z;
-	} else {
-		val = &y;
-	}
-		
+		4 ,
+		2 ,
+		1 ,
+	};
+
 	for (i = 0; i < ELEM_SIZE; i++)
 	{
 		x_temp = x;
-		printf("y : %10d\nx : %10d\n\n", y, x);
-		if (rot_decision(mode, *val))
+		if (z < 0)
+		{
+			x = x + (y >> i);
+			y = y - (x_temp >> i);
+			z = z + elem_angle[i]; 
+		} else {
+			x = x - (y >> i);
+			y = y + (x_temp >> i);
+			z = z - elem_angle[i];
+		}
+
+		i++;
+		x_temp = x;
+		if (z < 0)
 		{
 			x = x + (y >> i);
 			y = y - (x_temp >> i);
@@ -193,20 +141,116 @@ vector3 cordic(int x, int y, int z, cordic_mode_t mode)
 			z = z - elem_angle[i];
 		}
 	}
-	vector3 result;
-	result.x = x;
-	result.y = y;
-	result.z = z;	
 
-	/* 	Before returning the answer we me ensure we scale x and y
-		if we used the calcuator in rotation mode. */
-	if(mode == ROTATION)
+	x_temp = x;
+	if (z < 0)
 	{
-		result.x = (int)(result.x / SCALE_CONSTANT);
-		result.y = (int)(result.y / SCALE_CONSTANT);
+		x = x + (y >> i);
+		y = y - (x_temp >> i);
+		z = z + elem_angle[i]; 
+	} else {
+		x = x - (y >> i);
+		y = y + (x_temp >> i);
+		z = z - elem_angle[i];
 	}
+
+	vector2 result;
+	result.x = x * SCALE_CONSTANT;
+	result.y = y * SCALE_CONSTANT;
 	return result;
 }
+
+int cordic_vector(register int x, register int y, register int z)
+{
+	register int i;
+	register int x_temp;
+	register int z_temp = z;
+
+	int elem_angle[] = {
+		843314857 ,
+		497837829 ,
+		263043837 ,
+		133525159 ,
+
+		67021687 ,
+		33543516 ,
+		16775851 ,
+		8388437 ,
+
+		4194283 ,
+		2097149 ,
+		1048576 ,
+		524288 ,
+
+		262144 ,
+		131072 ,
+		65536 ,
+		32768 ,
+
+		16384 ,
+		8192 ,
+		4096 ,
+		2048 ,
+
+		1024 ,
+		512 ,
+		256 ,
+		128 ,
+
+		64 ,
+		32 ,
+		16 ,
+		8 ,
+
+		4 ,
+		2 ,
+		1 ,
+	};
+
+	for (i = 0; i < ELEM_SIZE;)
+	{	
+		x_temp = x;
+		if (y >= 0)
+		{
+			x = x + (y >> i);
+			y = y - (x_temp >> i);
+			z = z + elem_angle[i]; 
+		} else {
+			x = x - (y >> i);
+			y = y + (x_temp >> i);
+			z = z - elem_angle[i];
+		}
+		i++;
+		x_temp = x;
+		if (y >= 0)
+		{
+			x = x + (y >> i);
+			y = y - (x_temp >> i);
+			z = z + elem_angle[i]; 
+		} else {
+			x = x - (y >> i);
+			y = y + (x_temp >> i);
+			z = z - elem_angle[i];
+		}
+		i++;
+	}
+
+	x_temp = x;
+	if (y >= 0)
+	{
+		x = x + (y >> i);
+		y = y - (x_temp >> i);
+		z = z + elem_angle[i]; 
+	} else {
+		x = x - (y >> i);
+		y = y + (x_temp >> i);
+		z = z - elem_angle[i];
+	}
+
+	return z - z_temp;
+
+}
+
 
 //Friendly Method
 /*
@@ -222,7 +266,7 @@ double cos_cordic(double theta)
 	*/
 	//Convert input to CORDIC base
 	int thetai = float_to_fixed(theta);
-	return fixed_to_float(cordic(SHIFT_BASE,0,thetai, ROTATION).x);
+	return fixed_to_float(cordic_rotation(SHIFT_BASE,0,thetai).x);
 }
 
 
@@ -239,7 +283,7 @@ double sin_cordic(double theta)
 	of the result.
 	*/
 	int thetai = float_to_fixed(theta);
-	return fixed_to_float(cordic(SHIFT_BASE,0,thetai, ROTATION).y);
+	return fixed_to_float(cordic_rotation(SHIFT_BASE,0,thetai).y);
 }
 
 
@@ -256,7 +300,7 @@ double atan2_cordic(double y, double x)
 	//printf("atan - x Value: %d\n", xi);
 	int yi = normalize(y);
 	//printf("atan - y Value: %d\n", yi);
-	return fixed_to_float(cordic(xi,yi,0, VECTOR).z);
+	return fixed_to_float(cordic_vector(xi,yi,0));
 }
 
 //R may be any double value. we will normalize it.
@@ -267,9 +311,9 @@ double atan_cordic(double r)
 	use r as the base vector length, rather than additional pi/2
 	use in conversion.
 	*/
-	int yi = normalize(1);
+	int yi = normalize(1.0);
 	int xi = normalize(1.0/r);
-	return fixed_to_float(cordic(xi,yi,0, VECTOR).z);
+	return fixed_to_float(cordic_vector(xi,yi,0));
 }
 
 int main()
