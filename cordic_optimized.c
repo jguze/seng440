@@ -109,7 +109,6 @@ vector2 cordic_rotation(register int x, register int y, register int z)
 		}
 	}
 
-	i++;
 	x_temp = x;
 	if (z < 0)
 	{
@@ -206,7 +205,6 @@ int cordic_vector(register int x, register int y, register int z)
 		}
 	}
 
-	i++;
 	x_temp = x;
 	if (y >= 0)
 	{
