@@ -111,7 +111,7 @@ int normalize(double flt)
 	//our x and y values for Vectoring mode to be no larger than 
 	//the squareroot of 2. 
 	//More info available in techincal report.
-	return (int)(flt * (SHIFT_BASE * 0.7));
+	return (int)(flt * (SHIFT_BASE * 0.85));
 }
 
 /*
